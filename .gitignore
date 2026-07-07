@@ -1,0 +1,7 @@
+.DS_Store
+.claude/
+_docs/
+_dev/
+node_modules/
+dist/
+coverage/
