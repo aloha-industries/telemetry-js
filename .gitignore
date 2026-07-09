@@ -3,5 +3,5 @@
 _docs/
 _dev/
 node_modules/
-dist/
+
 coverage/
