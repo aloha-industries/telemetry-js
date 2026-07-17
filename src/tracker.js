@@ -142,13 +142,31 @@ export function initTracker(options = {}) {
         for (const { target, isIntersecting } of entries) {
           if (!isIntersecting) continue;
           observer.unobserve(target);
-          
+
           const id = target.getAttribute('data-context-id');
           if (id) enqueue('impression', id);
         }
       }));
 
-      document.querySelectorAll('[data-action="impression"]').forEach(el => observer.observe(el));
+      const observeIfMatch = (node) => {
+        if (node.nodeType !== 1) return;
+        if (node.matches?.('[data-action="impression"]')) observer.observe(node);
+        node.querySelectorAll?.('[data-action="impression"]').forEach((el) => observer.observe(el));
+      };
+
+      document.querySelectorAll('[data-action="impression"]').forEach((el) => observer.observe(el));
+
+      // Elements swapped/injected in after this initial scan (client-side
+      // region switches, infinite scroll, etc.) still get observed.
+      if (typeof MutationObserver !== 'undefined') {
+        const mutationObserver = new MutationObserver(safe((mutations) => {
+          for (const mutation of mutations) {
+            mutation.addedNodes.forEach(observeIfMatch);
+          }
+        }));
+        mutationObserver.observe(document.body, { childList: true, subtree: true });
+        signal.addEventListener('abort', () => mutationObserver.disconnect());
+      }
     }
   })();
 }

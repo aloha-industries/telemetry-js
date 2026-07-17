@@ -1,6 +1,6 @@
 {
   "name": "@aloha-industries/telemetry-js",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Privacy-first browser event tracker. Captures search and click events with stateless, anonymous payloads \u2014 no cookies, no auth tokens, no identifiers.",
   "type": "module",
   "license": "MIT OR Apache-2.0",

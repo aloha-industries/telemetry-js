@@ -123,6 +123,31 @@ describe('initTracker — impressions', () => {
   });
 });
 
+describe('initTracker — impressions on dynamically-injected elements', () => {
+  it('observes elements added to the DOM after initTracker() ran', async () => {
+    setHtml(`<div data-action="impression" data-context-id="1042"></div>`);
+    initTracker();
+
+    const injected = document.createElement('div');
+    injected.setAttribute('data-action', 'impression');
+    injected.setAttribute('data-context-id', '2001');
+    document.body.appendChild(injected);
+
+    // MutationObserver callbacks fire as a microtask, not synchronously.
+    await Promise.resolve();
+
+    const [observer] = FakeIntersectionObserver.instances;
+    expect(observer.observed.has(injected)).toBe(true);
+
+    observer.intersect([injected]);
+    vi.advanceTimersByTime(600); // flush
+
+    expect(lastRequestBody()).toEqual({
+      events: [{ event_type: 'impression', context_id: '2001', metadata: {} }],
+    });
+  });
+});
+
 describe('silent failure', () => {
   it('never throws when fetch rejects', () => {
     globalThis.fetch.mockImplementation(() => Promise.reject(new Error('network down')));

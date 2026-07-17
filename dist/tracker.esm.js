@@ -1,21 +1,21 @@
-let f = !1, d = null;
+let b = !1, d = null;
 function k() {
-  f = !1, c = [], clearTimeout(a), a = null, d && (d.abort(), d = null);
+  b = !1, a = [], clearTimeout(l), l = null, d && (d.abort(), d = null);
 }
 const y = {
   endpoint: "/t/event",
   debounceMs: 1e3
 }, S = 50, T = 500;
-let c = [], a = null, b = { ...y };
-const r = (s) => (...i) => {
+let a = [], l = null, p = { ...y };
+const i = (s) => (...r) => {
   try {
-    return s(...i);
+    return s(...r);
   } catch {
   }
-}, h = r(() => {
-  if (a = null, c.length === 0) return;
-  const s = { events: [...c] };
-  c = [], fetch(b.endpoint, {
+}, g = i(() => {
+  if (l = null, a.length === 0) return;
+  const s = { events: [...a] };
+  a = [], fetch(p.endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(s),
@@ -24,42 +24,50 @@ const r = (s) => (...i) => {
     mode: "same-origin"
   }).catch(() => {
   });
-}), m = r((s, i, l = {}) => {
-  c.push({ event_type: s, context_id: i, metadata: l }), c.length >= S ? (clearTimeout(a), h()) : a === null && (a = setTimeout(h, T));
+}), m = i((s, r, u = {}) => {
+  a.push({ event_type: s, context_id: r, metadata: u }), a.length >= S ? (clearTimeout(l), g()) : l === null && (l = setTimeout(g, T));
 });
 function A(s = {}) {
-  f || (f = !0, r(() => {
+  b || (b = !0, i(() => {
     d = new AbortController();
-    const { signal: i } = d;
-    b = { ...y, ...s };
-    const l = /* @__PURE__ */ new Set(), g = (n, e, o = {}) => {
-      const t = `${n}:${e}`;
-      l.has(t) || (l.add(t), setTimeout(() => l.delete(t), b.debounceMs), m(n, e, o));
-    }, p = sessionStorage.getItem("telemetry_last_click");
-    if (p) {
-      const { id: n, timestamp: e } = JSON.parse(p), o = Date.now() - e;
-      o < 1e4 && m("bounce", n, { dwell_time_ms: o }), sessionStorage.removeItem("telemetry_last_click");
+    const { signal: r } = d;
+    p = { ...y, ...s };
+    const u = /* @__PURE__ */ new Set(), h = (o, n, e = {}) => {
+      const t = `${o}:${n}`;
+      u.has(t) || (u.add(t), setTimeout(() => u.delete(t), p.debounceMs), m(o, n, e));
+    }, v = sessionStorage.getItem("telemetry_last_click");
+    if (v) {
+      const { id: o, timestamp: n } = JSON.parse(v), e = Date.now() - n;
+      e < 1e4 && m("bounce", o, { dwell_time_ms: e }), sessionStorage.removeItem("telemetry_last_click");
     }
-    if (document.body.addEventListener("click", r((n) => {
-      const e = n.target.closest?.("[data-action]");
-      if (!e) return;
-      const o = e.getAttribute("data-action"), t = e.getAttribute("data-context-id") || "";
-      o === "click" && t && sessionStorage.setItem("telemetry_last_click", JSON.stringify({ id: t, timestamp: Date.now() })), g(o, t);
-    }), { signal: i }), document.addEventListener("submit", r((n) => {
-      const e = n.target.closest?.('[data-action="search"]');
-      if (!e) return;
-      const t = (e.querySelector("[data-search-input]") || e.querySelector("input"))?.value.trim() || "", u = e.getAttribute("data-result-count") === "0";
-      t && g(u ? "zero_result_search" : "search", t, u ? { result_count: 0 } : {});
-    }), { signal: i }), typeof IntersectionObserver < "u") {
-      const n = new IntersectionObserver(r((e) => {
-        for (const { target: o, isIntersecting: t } of e) {
-          if (!t) continue;
-          n.unobserve(o);
-          const u = o.getAttribute("data-context-id");
-          u && m("impression", u);
+    if (document.body.addEventListener("click", i((o) => {
+      const n = o.target.closest?.("[data-action]");
+      if (!n) return;
+      const e = n.getAttribute("data-action"), t = n.getAttribute("data-context-id") || "";
+      e === "click" && t && sessionStorage.setItem("telemetry_last_click", JSON.stringify({ id: t, timestamp: Date.now() })), h(e, t);
+    }), { signal: r }), document.addEventListener("submit", i((o) => {
+      const n = o.target.closest?.('[data-action="search"]');
+      if (!n) return;
+      const t = (n.querySelector("[data-search-input]") || n.querySelector("input"))?.value.trim() || "", c = n.getAttribute("data-result-count") === "0";
+      t && h(c ? "zero_result_search" : "search", t, c ? { result_count: 0 } : {});
+    }), { signal: r }), typeof IntersectionObserver < "u") {
+      const o = new IntersectionObserver(i((e) => {
+        for (const { target: t, isIntersecting: c } of e) {
+          if (!c) continue;
+          o.unobserve(t);
+          const f = t.getAttribute("data-context-id");
+          f && m("impression", f);
         }
-      }));
-      document.querySelectorAll('[data-action="impression"]').forEach((e) => n.observe(e));
+      })), n = (e) => {
+        e.nodeType === 1 && (e.matches?.('[data-action="impression"]') && o.observe(e), e.querySelectorAll?.('[data-action="impression"]').forEach((t) => o.observe(t)));
+      };
+      if (document.querySelectorAll('[data-action="impression"]').forEach((e) => o.observe(e)), typeof MutationObserver < "u") {
+        const e = new MutationObserver(i((t) => {
+          for (const c of t)
+            c.addedNodes.forEach(n);
+        }));
+        e.observe(document.body, { childList: !0, subtree: !0 }), r.addEventListener("abort", () => e.disconnect());
+      }
     }
   })());
 }
